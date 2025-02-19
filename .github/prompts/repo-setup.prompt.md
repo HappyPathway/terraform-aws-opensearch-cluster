@@ -1,16 +1,3 @@
-# Building an OpenSearch Cluster
+# terraform-aws-opensearch-cluster
 
-## Metadata
-- Purpose: Generate Terraform code to create an OpenSearch cluster
-- Author: Dave Arnold
-- Date: 2025-02-18
-
-## Instructions
-please inspect the documentation for aws_opensearch_cluster and any related infrastructure that should be required for completing an aws opensearch module.
-
-must follow best practices
-
-all attributes on all incldued resources should be exposed
-
-each resource type should have it's own object type variable
-all attributes should be marked as optional in the variable.
+This module will provision an Amazon OpenSearch cluster for the non-transactional database tier. It will support scalable log storage and metric management, ensuring efficient log and metric handling.
