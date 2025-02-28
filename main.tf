@@ -1,72 +1,31 @@
 resource "aws_opensearch_domain" "main" {
   domain_name = var.domain_name
 
-  dynamic "cluster_config" {
-    for_each = var.cluster_config != null ? [var.cluster_config] : []
-    content {
-      instance_type                = cluster_config.value.instance_type
-      instance_count               = cluster_config.value.instance_count
-      zone_awareness_enabled       = cluster_config.value.zone_awareness_enabled
-      dedicated_master_enabled     = cluster_config.value.dedicated_master_enabled
-      dedicated_master_type        = cluster_config.value.dedicated_master_type
-      dedicated_master_count       = cluster_config.value.dedicated_master_count
-      warm_enabled                 = cluster_config.value.warm_enabled
-      warm_count                   = cluster_config.value.warm_count
-      warm_type                    = cluster_config.value.warm_type
-
-      dynamic "cold_storage_options" {
-        for_each = cluster_config.value.cold_storage_options != null ? [cluster_config.value.cold_storage_options] : []
-        content {
-          enabled = cold_storage_options.value.enabled
-        }
-      }
-    }
+  cluster_config {
+    instance_type          = var.cluster_config.instance_type
+    instance_count         = var.cluster_config.instance_count
+    zone_awareness_enabled = var.cluster_config.zone_awareness_enabled
   }
 
-  dynamic "ebs_options" {
-    for_each = var.ebs_options != null ? [var.ebs_options] : []
-    content {
-      ebs_enabled = ebs_options.value.ebs_enabled
-      volume_type = ebs_options.value.volume_type
-      volume_size = ebs_options.value.volume_size
-      iops        = ebs_options.value.iops
-    }
+  ebs_options {
+    ebs_enabled = true
+    volume_type = "gp3"
+    volume_size = 100
   }
 
-  dynamic "encrypt_at_rest" {
-    for_each = var.encrypt_at_rest != null ? [var.encrypt_at_rest] : []
-    content {
-      enabled    = encrypt_at_rest.value.enabled
-      kms_key_id = encrypt_at_rest.value.kms_key_id
-    }
+  encrypt_at_rest {
+    enabled    = var.encrypt_at_rest.enabled
+    kms_key_id = var.encrypt_at_rest.kms_key_id
   }
 
-  dynamic "vpc_options" {
-    for_each = var.vpc_options != null ? [var.vpc_options] : []
-    content {
-      subnet_ids         = vpc_options.value.subnet_ids
-      security_group_ids = concat(
-        coalesce(vpc_options.value.security_group_ids, []),
-        var.create_security_group && var.security_group_config != null ? [aws_security_group.opensearch[0].id] : []
-      )
-    }
+  vpc_options {
+    subnet_ids         = var.vpc_options.subnet_ids
+    security_group_ids = var.vpc_options.security_group_ids
   }
 
-  dynamic "advanced_security_options" {
-    for_each = var.advanced_security_options != null ? [var.advanced_security_options] : []
-    content {
-      enabled                        = advanced_security_options.value.enabled
-      internal_user_database_enabled = advanced_security_options.value.internal_user_database_enabled
-
-      dynamic "master_user_options" {
-        for_each = advanced_security_options.value.master_user_options != null ? [advanced_security_options.value.master_user_options] : []
-        content {
-          master_user_name     = master_user_options.value.master_user_name
-          master_user_password = master_user_options.value.master_user_password
-          master_user_arn      = master_user_options.value.master_user_arn
-        }
-      }
-    }
+  advanced_security_options {
+    enabled                        = false
+    internal_user_database_enabled = false
   }
 
   tags = var.tags
